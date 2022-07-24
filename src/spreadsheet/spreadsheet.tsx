@@ -3,13 +3,17 @@ import Spreadsheet from "x-data-spreadsheet";
 import 'x-data-spreadsheet/dist/xspreadsheet.css';
 import { xtos } from "../utils/xlsx-utils";
 import * as XLSX from "xlsx";
+import Modal from "../modal/modal";
 
 interface CustomDivRef extends HTMLDivElement {
   [key: string]: any;
 }
 
-const SpreadSheet = (props: any) => {
+const SpreadSheet = () => {
   const divRef = React.createRef<CustomDivRef>();
+
+  const [openModal, setOpenModal] = React.useState<boolean>(false);
+  const toggleModal = () => setOpenModal(!openModal);
 
   const options = React.useMemo(() => ({
     view: {
@@ -24,19 +28,20 @@ const SpreadSheet = (props: any) => {
     }
   }, [divRef, options]);
 
-  const downloadXLSX = () => {
+  const downloadFile = (fileName: string, fileExt: string) => {
     const xspr = divRef.current?.grid;
     const new_wb = xtos(xspr.getData());
-    XLSX.writeFile(new_wb, "downloaded_file.xlsx");
+    XLSX.writeFile(new_wb, fileName + fileExt);
   };
 
   return (
     <>
-      <button onClick={downloadXLSX}>{"Download XLSX"}</button>
       <div
         id="x-spreadsheet-demo"
         ref={divRef}
       />
+      <button onClick={toggleModal} style={{ float: "right" }}>{"Export Data"}</button>
+      <Modal isOpen={openModal} toggle={toggleModal} saveFunction={downloadFile} />
     </>
   );
 }
